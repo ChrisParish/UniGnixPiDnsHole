@@ -84,7 +84,7 @@ func main() {
 		}
 	}
 	for idx, cnameHost := range cnameHosts {
-		cnameHosts[idx] = fmt.Sprintf("%s,%s.%s", cnameHost, config.WebEdge, config.Domain)
+		cnameHosts[idx] = fmt.Sprintf("%s,%s.%s", cnameHost, config.WebEdge, config.Local)
 	}
 
 	fmt.Printf("%d CNAME Hosts Found\n", len(cnameHosts))
