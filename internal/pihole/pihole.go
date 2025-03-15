@@ -84,6 +84,10 @@ func auth(url string, password string) error {
 	return nil
 }
 
+func ClearAuth() {
+	authResponse = AuthResponse{}
+}
+
 func addHeaders(req *http.Request) {
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("accept", "application/json")

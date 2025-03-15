@@ -92,6 +92,7 @@ func main() {
 	fmt.Println()
 	for _, piHoleConfig := range config.PiHole {
 		fmt.Println("Processing DNS on PiHole: " + piHoleConfig.Name)
+		pihole.ClearAuth()
 		aRecords, cnames, err := pihole.GetLocalDns(piHoleConfig.Url, piHoleConfig.Password)
 		check(err)
 		fmt.Printf("	%d A Records Found\n", len(aRecords))
