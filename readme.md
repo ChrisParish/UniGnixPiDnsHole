@@ -28,6 +28,27 @@ Now, I could just manually enter the details into the PiHoles but where is the f
 
 I have very little experience writing in Golang, but I am a seasoned developer in C# so I figured "What the hell, let's use Golang!"
 
+## Building
+
+I have included a make file for basic building and containerisation operations.
+> Be sure to update the variables at the top of the make file before running it
+
+* `make run` - Runs the app locally using go.
+* `make compile` - Compiles binaries for several OS / Arch combos
+    * `macos_arm64` - Apple Silicon
+    * `macos_amd64` - Intel Mac
+    * `linux_amd64` - Intel/AMD Linux
+    * `linux_arm64` - Raspberry PI 3,4,5
+    * `windows_amd64.exe` - Windows, you heathen
+* `make docker` - Builds and tags the image
+* `make docker-push` - Pushes the imgae to the tagged registery, assuming you are logged in
+* `make docker-multiarch` - Build multi arch docker images
+    * `arm64` - Raspberry PI 3,4,5
+    * `amd64` - Everything else
+* `make clean` - Cleans up after itself
+
+> If you are using the `devcontainer` environment then you won't be able to run the docker commands unless you enhance the image.
+
 ## Using the app
 
 Assuming that you know enough to download and compile the app, the configuration should not cause you any trouble. Copy `config.json.template` and rename it to `config.json`
