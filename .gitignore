@@ -15,6 +15,9 @@
 # Output of the go build tool
 _build/
 
+# Output of build
+bin/
+
 # Output of the go vet tool
 vet.out
 
