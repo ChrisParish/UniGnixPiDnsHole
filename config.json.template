@@ -1,0 +1,23 @@
+{
+    "unifi": {
+        "username": "your_username",
+        "password": "your_password",
+        "url": "https://your_controller_url",
+        "site": "your_site"
+    },
+    "pihole": [
+        {
+            "name": "your_pihole_name",
+            "url": "http://your_pihole_url",
+            "password": "your_pihole_password"
+        }
+    ],
+    "nginxProxyManager": {
+        "url": "http://your_nginx_proxy_manager_url",
+        "password": "your_nginx_proxy_manager_password",
+        "username": "your_nginx_proxy_manager_username"
+    },
+    "domain": "your_domain",
+    "webEdge": "your_web_edge",
+    "local": "your_local"
+}
