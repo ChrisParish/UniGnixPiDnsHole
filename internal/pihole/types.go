@@ -1,5 +1,29 @@
 package pihole
 
+import "encoding/json"
+
+// DomainConfig represents the domain configuration which can be either a string or an object
+type DomainConfig struct {
+	Name  string `json:"name"`
+	Local bool   `json:"local"`
+}
+
+// UnmarshalJSON custom unmarshaler to handle both string and object formats
+func (d *DomainConfig) UnmarshalJSON(data []byte) error {
+	// Try to unmarshal as string first
+	var s string
+	if err := json.Unmarshal(data, &s); err == nil {
+		d.Name = s
+		d.Local = false
+		return nil
+	}
+
+	// If that fails, unmarshal as object
+	type Alias DomainConfig
+	aux := &struct{ *Alias }{Alias: (*Alias)(d)}
+	return json.Unmarshal(data, aux)
+}
+
 type DNS struct {
 	Upstreams           []string       `json:"upstreams"`
 	CNAMEdeepInspect    bool           `json:"CNAMEdeepInspect"`
@@ -14,7 +38,7 @@ type DNS struct {
 	Hosts               []string       `json:"hosts"`
 	DomainNeeded        bool           `json:"domainNeeded"`
 	ExpandHosts         bool           `json:"expandHosts"`
-	Domain              string         `json:"domain"`
+	Domain              DomainConfig   `json:"domain"`
 	BogusPriv           bool           `json:"bogusPriv"`
 	DNSSEC              bool           `json:"dnssec"`
 	Interface           string         `json:"interface"`
@@ -23,6 +47,7 @@ type DNS struct {
 	QueryLogging        bool           `json:"queryLogging"`
 	CnameRecords        []string       `json:"cnameRecords"`
 	Port                int            `json:"port"`
+	Localise            bool           `json:"localise,omitempty"`
 	RevServers          []string       `json:"revServers"`
 	Cache               Cache          `json:"cache"`
 	Blocking            Blocking       `json:"blocking"`
@@ -46,11 +71,12 @@ type Blocking struct {
 type SpecialDomains struct {
 	MozillaCanary      bool `json:"mozillaCanary"`
 	ICloudPrivateRelay bool `json:"iCloudPrivateRelay"`
+	DesignatedResolver bool `json:"designatedResolver,omitempty"`
 }
 
 type Reply struct {
-	Host     Host     `json:"host"`
-	Blocking Blocking `json:"blocking"`
+	Host     Host          `json:"host"`
+	Blocking BlockingReply `json:"blocking"`
 }
 
 type Host struct {
@@ -58,6 +84,13 @@ type Host struct {
 	IPv4   string `json:"IPv4"`
 	Force6 bool   `json:"force6"`
 	IPv6   string `json:"IPv6"`
+}
+
+type BlockingReply struct {
+	Force4 bool   `json:"force4,omitempty"`
+	Force6 bool   `json:"force6,omitempty"`
+	IPv4   string `json:"IPv4,omitempty"`
+	IPv6   string `json:"IPv6,omitempty"`
 }
 
 type RateLimit struct {
@@ -126,16 +159,18 @@ type Network struct {
 }
 
 type Webserver struct {
-	Domain    string    `json:"domain"`
-	ACL       string    `json:"acl"`
-	Port      string    `json:"port"`
-	Threads   int       `json:"threads"`
-	Headers   []string  `json:"headers"`
-	Session   Session   `json:"session"`
-	TLS       TLS       `json:"tls"`
-	Paths     Paths     `json:"paths"`
-	Interface Interface `json:"interface"`
-	API       API       `json:"api"`
+	Domain       string    `json:"domain"`
+	ACL          string    `json:"acl"`
+	Port         string    `json:"port"`
+	Threads      int       `json:"threads"`
+	Headers      []string  `json:"headers"`
+	ServeAll     bool      `json:"serve_all,omitempty"`
+	AdvancedOpts []string  `json:"advancedOpts,omitempty"`
+	Session      Session   `json:"session"`
+	TLS          TLS       `json:"tls"`
+	Paths        Paths     `json:"paths"`
+	Interface    Interface `json:"interface"`
+	API          API       `json:"api"`
 }
 
 type Session struct {
@@ -144,12 +179,14 @@ type Session struct {
 }
 
 type TLS struct {
-	Cert string `json:"cert"`
+	Cert     string `json:"cert"`
+	Validity int    `json:"validity,omitempty"`
 }
 
 type Paths struct {
 	Webroot string `json:"webroot"`
 	Webhome string `json:"webhome"`
+	Prefix  string `json:"prefix,omitempty"`
 }
 
 type Interface struct {
@@ -186,7 +223,7 @@ type Files struct {
 	Gravity    string `json:"gravity"`
 	GravityTmp string `json:"gravity_tmp"`
 	MacVendor  string `json:"macvendor"`
-	SetupVars  string `json:"setupVars"`
+	SetupVars  string `json:"setupVars,omitempty"`
 	PCAP       string `json:"pcap"`
 	Log        Log    `json:"log"`
 }
@@ -198,15 +235,17 @@ type Log struct {
 }
 
 type Misc struct {
-	PrivacyLevel int      `json:"privacylevel"`
-	DelayStartup int      `json:"delay_startup"`
-	Nice         int      `json:"nice"`
-	Addr2line    bool     `json:"addr2line"`
-	EtcDnsmasqD  bool     `json:"etc_dnsmasq_d"`
-	DnsmasqLines []string `json:"dnsmasq_lines"`
-	ExtraLogging bool     `json:"extraLogging"`
-	ReadOnly     bool     `json:"readOnly"`
-	Check        Check    `json:"check"`
+	PrivacyLevel    int      `json:"privacylevel"`
+	DelayStartup    int      `json:"delay_startup"`
+	Nice            int      `json:"nice"`
+	Addr2line       bool     `json:"addr2line"`
+	EtcDnsmasqD     bool     `json:"etc_dnsmasq_d"`
+	DnsmasqLines    []string `json:"dnsmasq_lines"`
+	ExtraLogging    bool     `json:"extraLogging"`
+	ReadOnly        bool     `json:"readOnly"`
+	NormalizeCPU    bool     `json:"normalizeCPU,omitempty"`
+	HideDnsmasqWarn bool     `json:"hide_dnsmasq_warn,omitempty"`
+	Check           Check    `json:"check"`
 }
 
 type Check struct {
